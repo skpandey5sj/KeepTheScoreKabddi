@@ -1,254 +1,734 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title> Basketball Pro </title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card: rgba(30, 41, 59, 0.7);
-      --glow: 0 0 20px rgba(59, 130, 246, 0.4);
-    }
-    body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      background-attachment: fixed;
-    }
-    .glass {
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    .score-glow {
-      text-shadow: 0 0 30px currentColor;
-    }
-    .btn-hover {
-      transition: all 0.15s ease;
-    }
-    .btn-hover:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-    }
-    .active-timer {
-      color: #34d399;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50%     { opacity: 0.65; }
-    }
-    input:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.5);
-    }
-    .possession-arrow { font-size: 2.2rem; font-weight: bold; color: white; }
-    @media (max-width: 768px) {
-      .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-      .text-8xl { font-size: 5rem; }
-      .text-6xl { font-size: 4rem; }
-      header { flex-direction: column; gap: 1rem; }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> Basketball Pro </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+            --glow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background-attachment: fixed;
+        }
+        .glass {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        .score-glow {
+            text-shadow: 0 0 30px currentColor;
+        }
+        .btn-hover {
+            transition: all 0.15s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+        .active-timer {
+            color: #34d399;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.65;
+            }
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .possession-arrow {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1rem;
+            }
+            .text-8xl {
+                font-size: 5rem;
+            }
+            .text-6xl {
+                font-size: 4rem;
+            }
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
 <body class="text-gray-100 min-h-screen font-sans">
-
-<header class="bg-gradient-to-r from-indigo-950 to-slate-950 shadow-xl">
-  <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div class="flex items-center gap-4">
-      <h1 class="text-2xl md:text-3xl font-black tracking-tight">Basketball Pro</h1>
-      <div class="flex items-center gap-3">
-        <button id="vmixBtn" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-lg font-semibold transition btn-hover">
-          <i class="fa-solid fa-plug mr-1"></i> vMix
-        </button>
-        <span id="vmixStatus" class="text-sm text-gray-400">Not connected</span>
-      </div>
-    </div>
-
-    <div class="flex flex-wrap gap-3 justify-center sm:justify-end">
-      <button id="switchPosBtn" class="bg-violet-700 hover:bg-violet-600 px-5 py-2 rounded-lg font-semibold btn-hover">
-        <i class="fa-solid fa-arrows-rotate mr-1"></i> Possession
-      </button>
-      <button id="hidePosBtn" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg font-semibold btn-hover">
-        <i class="fa-solid fa-eye-slash mr-1"></i> Hide Pos
-      </button>
-      <button id="resetBtn" class="bg-rose-700 hover:bg-rose-600 px-5 py-2 rounded-lg font-semibold btn-hover">
-        <i class="fa-solid fa-arrows-rotate-left mr-1"></i> Reset
-      </button>
-    </div>
-  </div>
-</header>
-
-<main class="container mx-auto px-4 py-6">
-
-  <!-- Quarter + Swap -->
-  <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4 flex-wrap">
-    <label class="font-semibold text-lg">Quarter:</label>
-    <select id="quarterSelect" class="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
-      <option value="1">1st</option>
-      <option value="2">2nd</option>
-      <option value="3">3rd</option>
-      <option value="4">4th</option>
-      <option value="5">OT1</option>
-      <option value="6">OT2</option>
-      <option value="7">OT3</option>
-      <option value="8">OT4</option>
-      <option value="9">OT5</option>
-      <option value="10">OT6</option>
-      <option value="11">OT7</option>
-      <option value="12">OT8</option>
-    </select>
-    <button id="swapTeamsBtn" class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg font-semibold btn-hover">
-      <i class="fa-solid fa-right-left mr-1"></i> Swap Teams
-    </button>
-  </div>
-
-  <!-- Preview -->
-  <div class="glass rounded-2xl p-6 md:p-10 mb-10">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-8 text-center">
-      <div>
-        <h2 id="homeNamePrev" class="text-3xl md:text-4xl font-bold text-yellow-400 mb-2">HOME</h2>
-        <div id="homeScorePrev" class="text-6xl md:text-8xl font-black score-glow text-yellow-300">00</div>
-        <div class="mt-3 text-lg">
-          TO: <span id="homeTOPrev">8</span> • F: <span id="homeFoulsPrev">0</span>
+    <header class="bg-gradient-to-r from-indigo-950 to-slate-950 shadow-xl">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight">Basketball Pro</h1>
+                <div class="flex items-center gap-3">
+                    <button id="vmixBtn"
+                        class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-lg font-semibold transition btn-hover">
+                        <i class="fa-solid fa-plug mr-1"></i> vMix
+                    </button>
+                    <span id="vmixStatus" class="text-sm text-gray-400">Not connected</span>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-3 justify-center sm:justify-end">
+                <button id="resetBtn"
+                    class="bg-rose-700 hover:bg-rose-600 px-5 py-2 rounded-lg font-semibold btn-hover">
+                    <i class="fa-solid fa-arrows-rotate-left mr-1"></i> Reset
+                </button>
+            </div>
         </div>
-      </div>
-
-      <div class="text-center">
-        <div id="quarterPrev" class="text-4xl md:text-5xl font-bold mb-3">1ST</div>
-        <div class="text-xl md:text-2xl opacity-80 font-semibold flex items-center justify-center gap-6">
-          <span id="homeArrow" class="possession-arrow"></span>
-          <span id="possessionPrev">HOME POSSESSION</span>
-          <span id="awayArrow" class="possession-arrow"></span>
+    </header>
+    <main class="container mx-auto px-4 py-6">
+        <!-- Quarter + Swap -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4 flex-wrap">
+            <label class="font-semibold text-lg">Quarter:</label>
+            <select id="quarterSelect"
+                class="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+                <option value="4">4th</option>
+                <option value="5">OT1</option>
+                <option value="6">OT2</option>
+                <option value="7">OT3</option>
+                <option value="8">OT4</option>
+                <option value="9">OT5</option>
+                <option value="10">OT6</option>
+                <option value="11">OT7</option>
+                <option value="12">OT8</option>
+            </select>
+            <button id="swapTeamsBtn"
+                class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg font-semibold btn-hover">
+                <i class="fa-solid fa-right-left mr-1"></i> Swap Teams
+            </button>
         </div>
-        <div class="mt-6 text-2xl md:text-3xl font-mono">
-          <span id="gameTimerPrev" class="active-timer">10:00</span>
-            •  
-          <span id="shotClockPrev" class="active-timer">24</span>
+        <!-- Preview -->
+        <div class="glass rounded-2xl p-6 md:p-10 mb-10">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8 text-center">
+                <div>
+                    <h2 id="homeNamePrev" class="text-3xl md:text-4xl font-bold text-yellow-400 mb-2">HOME</h2>
+                    <div id="homeScorePrev" class="text-6xl md:text-8xl font-black score-glow text-yellow-300">00</div>
+                    <div class="mt-3 text-lg">
+                        TO: <span id="homeTOPrev">8</span> • F: <span id="homeFoulsPrev">0</span>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div id="quarterPrev" class="text-4xl md:text-5xl font-bold mb-3">1ST</div>
+                    <div class="text-xl md:text-2xl opacity-80 font-semibold flex items-center justify-center gap-6">
+                        <span id="homeArrow" class="possession-arrow"></span>
+                        <span id="possessionPrev">HOME POSSESSION</span>
+                        <span id="awayArrow" class="possession-arrow"></span>
+                    </div>
+                    <div class="mt-6 text-2xl md:text-3xl font-mono">
+                        <span id="gameTimerPrev" class="active-timer">10:00</span>
+                          •  
+                        <span id="shotClockPrev" class="active-timer">24</span>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="awayNamePrev" class="text-3xl md:text-4xl font-bold text-orange-400 mb-2">AWAY</h2>
+                    <div id="awayScorePrev" class="text-6xl md:text-8xl font-black score-glow text-orange-300">00</div>
+                    <div class="mt-3 text-lg">
+                        TO: <span id="awayTOPrev">8</span> • F: <span id="awayFoulsPrev">0</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <div>
-        <h2 id="awayNamePrev" class="text-3xl md:text-4xl font-bold text-orange-400 mb-2">AWAY</h2>
-        <div id="awayScorePrev" class="text-6xl md:text-8xl font-black score-glow text-orange-300">00</div>
-        <div class="mt-3 text-lg">
-          TO: <span id="awayTOPrev">8</span> • F: <span id="awayFoulsPrev">0</span>
+        <div class="flex justify-end gap-2 mb-4">
+            <button id="switchPosBtn"
+                class="bg-violet-700 hover:bg-violet-600 px-5 py-2 rounded-lg font-semibold btn-hover">
+                <i class="fa-solid fa-arrows-rotate mr-1"></i> Possession
+            </button>
+            <button id="hidePosBtn" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg font-semibold btn-hover">
+                <i class="fa-solid fa-eye-slash mr-1"></i> Hide Pos
+            </button>
         </div>
-      </div>
+        <!-- Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Game Timer -->
+            <div class="glass rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 text-center">Game Timer</h3>
+                <div id="gameTimerCtrl"
+                    class="text-5xl font-mono font-bold text-center mb-6 active-timer cursor-pointer editable">10:00
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button data-timer-adjust="60"
+                        class="bg-emerald-700 hover:bg-emerald-600 py-3 rounded btn-hover">+60</button>
+                    <button data-timer-adjust="-60"
+                        class="bg-rose-700 hover:bg-rose-600 py-3 rounded btn-hover">-60</button>
+                    <button data-timer-adjust="1"
+                        class="bg-emerald-800 hover:bg-emerald-700 py-3 rounded btn-hover">+1</button>
+                    <button data-timer-adjust="-1"
+                        class="bg-rose-800 hover:bg-rose-700 py-3 rounded btn-hover">-1</button>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button id="startGame" class="bg-emerald-600 py-3 rounded font-bold btn-hover">Start</button>
+                    <button id="pauseGame" class="bg-amber-600 py-3 rounded font-bold btn-hover">Pause</button>
+                    <button id="resetGame" class="bg-slate-700 py-3 rounded font-bold btn-hover">Reset</button>
+                </div>
+            </div>
+            <!-- Shot Clock -->
+            <div class="glass rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 text-center">Shot Clock</h3>
+                <div id="shotClockCtrl"
+                    class="text-5xl font-mono font-bold text-center mb-6 active-timer cursor-pointer editable">24</div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button data-shot-adjust="5"
+                        class="bg-emerald-700 hover:bg-emerald-600 py-3 rounded btn-hover">+5</button>
+                    <button data-shot-adjust="-5"
+                        class="bg-rose-700 hover:bg-rose-600 py-3 rounded btn-hover">-5</button>
+                    <button data-shot-adjust="1"
+                        class="bg-emerald-800 hover:bg-emerald-700 py-3 rounded btn-hover">+1</button>
+                    <button data-shot-adjust="-1"
+                        class="bg-rose-800 hover:bg-rose-700 py-3 rounded btn-hover">-1</button>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button id="shot24" class="bg-emerald-600 py-3 rounded font-bold btn-hover">24</button>
+                    <button id="shot14" class="bg-blue-600 py-3 rounded font-bold btn-hover">14</button>
+                    <button id="resetShot" class="bg-slate-700 py-3 rounded font-bold btn-hover">Reset</button>
+                </div>
+            </div>
+            <!-- Home -->
+            <div class="glass rounded-xl p-6 border-t-4 border-yellow-500">
+                <h3 id="homeNameCtrl" class="text-2xl font-bold mb-4 text-center cursor-pointer editable">HOME</h3>
+                <div id="homeScoreCtrl"
+                    class="text-6xl font-black text-center mb-6 cursor-pointer text-yellow-300 score-glow editable">0
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-5">
+                    <button data-home-score="3"
+                        class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+3</button>
+                    <button data-home-score="2"
+                        class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+2</button>
+                    <button data-home-score="1"
+                        class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+1</button>
+                    <button data-home-score="-3"
+                        class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-3</button>
+                    <button data-home-score="-2"
+                        class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-2</button>
+                    <button data-home-score="-1"
+                        class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-1</button>
+                </div>
+                <div class="grid grid-cols-4 gap-2 text-sm">
+                    <button data-home-to="1" class="bg-blue-700 hover:bg-blue-600 py-2 rounded btn-hover">TO +</button>
+                    <button data-home-to="-1" class="bg-rose-800 hover:bg-rose-700 py-2 rounded btn-hover">TO -</button>
+                    <button data-home-foul="1" class="bg-violet-700 hover:bg-violet-600 py-2 rounded btn-hover">F
+                        +</button>
+                    <button data-home-foul="-1" class="bg-rose-900 hover:bg-rose-800 py-2 rounded btn-hover">F
+                        -</button>
+                </div>
+            </div>
+            <!-- Away -->
+            <div class="glass rounded-xl p-6 border-t-4 border-orange-500">
+                <h3 id="awayNameCtrl" class="text-2xl font-bold mb-4 text-center cursor-pointer editable">AWAY</h3>
+                <div id="awayScoreCtrl"
+                    class="text-6xl font-black text-center mb-6 cursor-pointer text-orange-300 score-glow editable">0
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-5">
+                    <button data-away-score="3"
+                        class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+3</button>
+                    <button data-away-score="2"
+                        class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+2</button>
+                    <button data-away-score="1"
+                        class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+1</button>
+                    <button data-away-score="-3"
+                        class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-3</button>
+                    <button data-away-score="-2"
+                        class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-2</button>
+                    <button data-away-score="-1"
+                        class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-1</button>
+                </div>
+                <div class="grid grid-cols-4 gap-2 text-sm">
+                    <button data-away-to="1" class="bg-blue-700 hover:bg-blue-600 py-2 rounded btn-hover">TO +</button>
+                    <button data-away-to="-1" class="bg-rose-800 hover:bg-rose-700 py-2 rounded btn-hover">TO -</button>
+                    <button data-away-foul="1" class="bg-violet-700 hover:bg-violet-600 py-2 rounded btn-hover">F
+                        +</button>
+                    <button data-away-foul="-1" class="bg-rose-900 hover:bg-rose-800 py-2 rounded btn-hover">F
+                        -</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- vMix Modal -->
+    <div id="vmixModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50">
+        <div class="glass p-8 rounded-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">vMix Connection</h2>
+            <form id="vmixForm">
+                <div class="mb-4">
+                    <label class="block mb-1">IP Address</label>
+                    <input id="vmixIP" type="text" value="127.0.0.1"
+                        class="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">Port</label>
+                    <input id="vmixPort" type="number" value="8088"
+                        class="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-1">Input (number or GUID)</label>
+                    <input id="vmixInput" type="text" value="1"
+                        class="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-4 justify-end">
+                    <button type="button" id="vmixClose"
+                        class="px-6 py-3 bg-slate-700 rounded-lg hover:bg-slate-600">Cancel</button>
+                    <button type="submit"
+                        class="px-6 py-3 bg-emerald-600 rounded-lg hover:bg-emerald-500">Connect</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
+    <script>
+        // ────────────────────────────────────────────────
+        const STORAGE_KEY = "kts-basketball-state-2025";
+        let state = {
+            homeName: "KOLHAPUR KINGS",
+            awayName: "SATARA CHAMPS",
+            currentQuarter: 1,
+            quarters: Array(12).fill().map(() => ({ homeScore: 0, awayScore: 0, homeFouls: 0, awayFouls: 0, homeTO: 8, awayTO: 8 })),
+            possession: "home",
+            gameTime: 600,
+            shotTime: 24,
+            gameRunning: false,
+            shotRunning: false,
+            vmix: {
+                connected: false,
+                ip: "127.0.0.1",
+                port: 8088,
+                input: "1"
+            }
+        };
+        let gameTimerId = null;
+        let shotTimerId = null;
+        // ──── DOM elements ───────────────────────────────
+        const els = {
+            homeNamePrev: document.getElementById("homeNamePrev"),
+            awayNamePrev: document.getElementById("awayNamePrev"),
+            homeScorePrev: document.getElementById("homeScorePrev"),
+            awayScorePrev: document.getElementById("awayScorePrev"),
+            quarterPrev: document.getElementById("quarterPrev"),
+            possessionPrev: document.getElementById("possessionPrev"),
+            gameTimerPrev: document.getElementById("gameTimerPrev"),
+            shotClockPrev: document.getElementById("shotClockPrev"),
+            homeTOPrev: document.getElementById("homeTOPrev"),
+            awayTOPrev: document.getElementById("awayTOPrev"),
+            homeFoulsPrev: document.getElementById("homeFoulsPrev"),
+            awayFoulsPrev: document.getElementById("awayFoulsPrev"),
+            homeArrow: document.getElementById("homeArrow"),
+            awayArrow: document.getElementById("awayArrow"),
+            homeNameCtrl: document.getElementById("homeNameCtrl"),
+            awayNameCtrl: document.getElementById("awayNameCtrl"),
+            homeScoreCtrl: document.getElementById("homeScoreCtrl"),
+            awayScoreCtrl: document.getElementById("awayScoreCtrl"),
+            gameTimerCtrl: document.getElementById("gameTimerCtrl"),
+            shotClockCtrl: document.getElementById("shotClockCtrl"),
+            quarterSelect: document.getElementById("quarterSelect"),
+            vmixModal: document.getElementById("vmixModal"),
+        };
+        // ──── Core logic ─────────────────────────────────
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+        function loadState() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (!data) return;
+            try {
+                const loaded = JSON.parse(data);
+                Object.assign(state, loaded);
+                if (!state.quarters || state.quarters.length !== 12) {
+                    state.quarters = Array(12).fill().map(() => ({ homeScore: 0, awayScore: 0, homeFouls: 0, awayFouls: 0, homeTO: 8, awayTO: 8 }));
+                }
+            } catch { }
+        }
+        function getQ() {
+            return state.quarters[state.currentQuarter - 1];
+        }
+        function totalHome() { return state.quarters.reduce((s, q) => s + q.homeScore, 0); }
+        function totalAway() { return state.quarters.reduce((s, q) => s + q.awayScore, 0); }
+        function pad(n) { return n < 10 ? "0" + n : n; }
+        function formatTimer(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return `${m}:${pad(sec)}`;
+        }
+        function parseTimer(input) {
+            let str = String(input || '0:00').trim();
+            if (!str.includes(':')) {
+                return parseInt(str, 10) || 0;
+            }
+            const [m, s] = str.split(':').map(Number);
+            return (m || 0) * 60 + (s || 0);
+        }
+        function updateAllDisplays() {
+            const q = getQ();
+            els.homeNamePrev.textContent = state.homeName;
+            els.awayNamePrev.textContent = state.awayName;
+            els.homeScorePrev.textContent = totalHome();
+            els.awayScorePrev.textContent = totalAway();
+            els.quarterPrev.textContent = ["1st", "2nd", "3rd", "4th", "OT1", "OT2", "OT3", "OT4", "OT5", "OT6", "OT7", "OT8"][state.currentQuarter - 1];
+            els.possessionPrev.textContent = (state.possession === "home" ? "HOME" : "AWAY") + " POSSESSION";
+            els.gameTimerPrev.textContent = formatTimer(state.gameTime);
+            els.shotClockPrev.textContent = state.shotTime;
+            els.homeTOPrev.textContent = q.homeTO;
+            els.awayTOPrev.textContent = q.awayTO;
+            els.homeFoulsPrev.textContent = q.homeFouls;
+            els.awayFoulsPrev.textContent = q.awayFouls;
+            els.homeArrow.textContent = state.possession === "home" ? "<" : "";
+            els.awayArrow.textContent = state.possession === "away" ? ">" : "";
+            els.homeNameCtrl.textContent = state.homeName;
+            els.awayNameCtrl.textContent = state.awayName;
+            els.homeScoreCtrl.textContent = totalHome();
+            els.awayScoreCtrl.textContent = totalAway();
+            els.gameTimerCtrl.textContent = formatTimer(state.gameTime);
+            els.shotClockCtrl.textContent = state.shotTime;
+            if (state.vmix.connected) {
+                syncVmixLight();
+            }
+        }
+        function syncVmixLight() {
+            const base = `http://${state.vmix.ip}:${state.vmix.port}/api/?`;
+            const input = `Input=${encodeURIComponent(state.vmix.input)}`;
+            const data = [
+                ["MATCH CLOCK.Text", formatTimer(state.gameTime)],
+                ["SHOT CLOCK.Text", state.shotTime.toString()],
+                ["TEAM A POSSIN.Text", state.possession === "home" ? "<" : ""],
+                ["TEAM B POSSIN.Text", state.possession === "away" ? ">" : ""],
+            ];
+            data.forEach(([name, val]) => {
+                fetch(base + `Function=SetText&${input}&SelectedName=${encodeURIComponent(name)}&Value=${encodeURIComponent(val)}`)
+                    .catch(() => { });
+            });
+        }
+        function syncVmixFull() {
+            if (!state.vmix.connected) return;
+            const q = getQ();
+            const base = `http://${state.vmix.ip}:${state.vmix.port}/api/?`;
+            const input = `Input=${encodeURIComponent(state.vmix.input)}`;
+            const texts = [
+                ["TEAM A NAME.Text", state.homeName],
+                ["TEAM B NAME.Text", state.awayName],
+                ["MATCH CLOCK.Text", formatTimer(state.gameTime)],
+                ["QUARTER NAME.Text", ["1st", "2nd", "3rd", "4th", "OT1", "OT2", "OT3", "OT4", "OT5", "OT6", "OT7", "OT8"][state.currentQuarter - 1]],
+                ["SHOT CLOCK.Text", state.shotTime.toString()],
+                ["TEAM A SCORE.Text", totalHome().toString()],
+                ["TEAM B SCORE.Text", totalAway().toString()],
+                ["TEAM A TIME OUT.Text", `T:${q.homeTO}`],
+                ["TEAM A FOULS.Text", `F:${q.homeFouls}`],
+                ["TEAM B TIME OUT.Text", `T:${q.awayTO}`],
+                ["TEAM B FOULS.Text", `F:${q.awayFouls}`],
+                ["TEAM A POSSIN.Text", state.possession === "home" ? "<" : ""],
+                ["TEAM B POSSIN.Text", state.possession === "away" ? ">" : ""],
+            ];
+            texts.forEach(([k, v]) => {
+                fetch(base + `Function=SetText&${input}&SelectedName=${encodeURIComponent(k)}&Value=${encodeURIComponent(v)}`)
+                    .catch(e => console.warn("vMix set text failed", e));
+            });
+        }
+        function swapTeams() {
+            [state.homeName, state.awayName] = [state.awayName, state.homeName];
+            state.quarters.forEach(q => {
+                [q.homeScore, q.awayScore] = [q.awayScore, q.homeScore];
+                [q.homeFouls, q.awayFouls] = [q.awayFouls, q.homeFouls];
+                [q.homeTO, q.awayTO] = [q.awayTO, q.homeTO];
+            });
+            state.possession = state.possession === "home" ? "away" : "home";
+            updateAllDisplays();
+            saveState();
+            if (state.vmix.connected) syncVmixFull();
+        }
+        // ──── Timers ─────────────────────────────────────
+        function startGameTimer() {
+            if (state.gameRunning) return;
+            state.gameRunning = true;
+            gameTimerId = setInterval(() => {
+                if (state.gameTime <= 0) {
+                    clearInterval(gameTimerId);
+                    state.gameRunning = false;
+                    updateAllDisplays();
+                    return;
+                }
+                state.gameTime--;
+                updateAllDisplays();
+            }, 980);
+        }
+        function pauseGameTimer() {
+            clearInterval(gameTimerId);
+            state.gameRunning = false;
+            updateAllDisplays();
+        }
+        function resetGameTimer() {
+            pauseGameTimer();
+            state.gameTime = 600;
+            updateAllDisplays();
+        }
+        function startShot(val = 24) {
+            if (state.shotRunning) clearInterval(shotTimerId);
+            state.shotTime = val;
+            state.shotRunning = true;
+            updateAllDisplays();
+            shotTimerId = setInterval(() => {
+                if (state.shotTime <= 0) {
+                    clearInterval(shotTimerId);
+                    state.shotRunning = false;
+                    updateAllDisplays();
+                    return;
+                }
+                state.shotTime--;
+                updateAllDisplays();
+            }, 980);
+        }
+        function resetShot() {
+            clearInterval(shotTimerId);
+            state.shotRunning = false;
+            state.shotTime = 24;
+            updateAllDisplays();
+        }
+        // ──── Editable fields ─────────────
+        function makeEditable(el, getValue, setValue, isTimer = false) {
+            el.addEventListener("click", () => {
+                const old = el.innerText;
+                const input = document.createElement("input");
+                input.type = "text";
+                input.value = getValue();
+                input.className = "bg-transparent text-center w-full outline-none border-b-2 border-blue-500 text-inherit font-inherit";
+                el.innerHTML = "";
+                el.appendChild(input);
+                input.focus();
+                input.select();
+                const commit = () => {
+                    let v = input.value.trim();
+                    if (isTimer) {
+                        v = parseTimer(v);
+                    } else if (el.id.includes("Score")) {
+                        v = parseInt(v, 10) || 0;
+                    } else if (el.id.includes("Fouls") || el.id.includes("TO")) {
+                        v = parseInt(v, 10) || 0;
+                    }
+                    setValue(v);
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+                input.onblur = commit;
+                input.onkeydown = e => {
+                    if (e.key === "Enter") commit();
+                    if (e.key === "Escape") {
+                        el.innerText = old;
+                    }
+                };
+            });
+        }
+        // ──── Init ───────────────────────────────────────
+        function init() {
+            loadState();
+            els.quarterSelect.value = state.currentQuarter;
+            els.quarterSelect.addEventListener("change", e => {
+                state.currentQuarter = parseInt(e.target.value);
+                updateAllDisplays();
+                saveState();
+                if (state.vmix.connected) syncVmixFull();
+            });
+            document.getElementById("swapTeamsBtn")?.addEventListener("click", swapTeams);
 
-  <!-- Controls -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            // === MODIFIED: Possession switch → shot clock reset + start ===
+            document.getElementById("switchPosBtn").onclick = () => {
+                state.possession = state.possession === "home" ? "away" : "home";
+                startShot(24);                    // ← YE LINE ADD KI
+                saveState();
+                if (state.vmix.connected) syncVmixFull();
+            };
 
-    <!-- Game Timer -->
-    <div class="glass rounded-xl p-6">
-      <h3 class="text-xl font-bold mb-4 text-center">Game Timer</h3>
-      <div id="gameTimerCtrl" class="text-5xl font-mono font-bold text-center mb-6 active-timer cursor-pointer editable">10:00</div>
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <button data-timer-adjust="60" class="bg-emerald-700 hover:bg-emerald-600 py-3 rounded btn-hover">+60</button>
-        <button data-timer-adjust="-60" class="bg-rose-700 hover:bg-rose-600 py-3 rounded btn-hover">-60</button>
-        <button data-timer-adjust="1" class="bg-emerald-800 hover:bg-emerald-700 py-3 rounded btn-hover">+1</button>
-        <button data-timer-adjust="-1" class="bg-rose-800 hover:bg-rose-700 py-3 rounded btn-hover">-1</button>
-      </div>
-      <div class="grid grid-cols-3 gap-3">
-        <button id="startGame" class="bg-emerald-600 py-3 rounded font-bold btn-hover">Start</button>
-        <button id="pauseGame" class="bg-amber-600 py-3 rounded font-bold btn-hover">Pause</button>
-        <button id="resetGame" class="bg-slate-700 py-3 rounded font-bold btn-hover">Reset</button>
-      </div>
-    </div>
+            // Hide Pos → no change (sirf hide, shot reset nahi)
+            document.getElementById("hidePosBtn").onclick = () => {
+                state.possession = "none";
+                updateAllDisplays();
+                saveState();
+                if (state.vmix.connected) {
+                    const base = `http://${state.vmix.ip}:${state.vmix.port}/api/?`;
+                    const input = `Input=${encodeURIComponent(state.vmix.input)}`;
+                    fetch(base + `Function=SetText&${input}&SelectedName=TEAM A POSSIN.Text&Value=`);
+                    fetch(base + `Function=SetText&${input}&SelectedName=TEAM B POSSIN.Text&Value=`);
+                }
+            };
 
-    <!-- Shot Clock -->
-    <div class="glass rounded-xl p-6">
-      <h3 class="text-xl font-bold mb-4 text-center">Shot Clock</h3>
-      <div id="shotClockCtrl" class="text-5xl font-mono font-bold text-center mb-6 active-timer cursor-pointer editable">24</div>
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <button data-shot-adjust="5" class="bg-emerald-700 hover:bg-emerald-600 py-3 rounded btn-hover">+5</button>
-        <button data-shot-adjust="-5" class="bg-rose-700 hover:bg-rose-600 py-3 rounded btn-hover">-5</button>
-        <button data-shot-adjust="1" class="bg-emerald-800 hover:bg-emerald-700 py-3 rounded btn-hover">+1</button>
-        <button data-shot-adjust="-1" class="bg-rose-800 hover:bg-rose-700 py-3 rounded btn-hover">-1</button>
-      </div>
-      <div class="grid grid-cols-3 gap-3">
-        <button id="shot24" class="bg-emerald-600 py-3 rounded font-bold btn-hover">24</button>
-        <button id="shot14" class="bg-blue-600 py-3 rounded font-bold btn-hover">14</button>
-        <button id="resetShot" class="bg-slate-700 py-3 rounded font-bold btn-hover">Reset</button>
-      </div>
-    </div>
+            document.getElementById("resetBtn").onclick = () => {
+                if (!confirm("Reset ALL data to defaults?")) return;
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            };
 
-    <!-- Home -->
-    <div class="glass rounded-xl p-6 border-t-4 border-yellow-500">
-      <h3 id="homeNameCtrl" class="text-2xl font-bold mb-4 text-center cursor-pointer editable">HOME</h3>
-      <div id="homeScoreCtrl" class="text-6xl font-black text-center mb-6 cursor-pointer text-yellow-300 score-glow editable">0</div>
+            document.getElementById("startGame").onclick = startGameTimer;
+            document.getElementById("pauseGame").onclick = pauseGameTimer;
+            document.getElementById("resetGame").onclick = resetGameTimer;
+            document.querySelectorAll("[data-timer-adjust]").forEach(btn => {
+                btn.onclick = () => {
+                    const v = parseInt(btn.dataset.timerAdjust);
+                    state.gameTime = Math.max(0, Math.min(3600, state.gameTime + v));
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
 
-      <div class="grid grid-cols-3 gap-2 mb-5">
-        <button data-home-score="3" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+3</button>
-        <button data-home-score="2" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+2</button>
-        <button data-home-score="1" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+1</button>
-        <button data-home-score="-3" class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-3</button>
-        <button data-home-score="-2" class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-2</button>
-        <button data-home-score="-1" class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-1</button>
-      </div>
+            document.getElementById("shot24").onclick = () => startShot(24);
+            document.getElementById("shot14").onclick = () => startShot(14);
+            document.getElementById("resetShot").onclick = resetShot;
+            document.querySelectorAll("[data-shot-adjust]").forEach(btn => {
+                btn.onclick = () => {
+                    const v = parseInt(btn.dataset.shotAdjust);
+                    state.shotTime = Math.max(0, Math.min(30, state.shotTime + v));
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
 
-      <div class="grid grid-cols-4 gap-2 text-sm">
-        <button data-home-to="1" class="bg-blue-700 hover:bg-blue-600 py-2 rounded btn-hover">TO +</button>
-        <button data-home-to="-1" class="bg-rose-800 hover:bg-rose-700 py-2 rounded btn-hover">TO -</button>
-        <button data-home-foul="1" class="bg-violet-700 hover:bg-violet-600 py-2 rounded btn-hover">F +</button>
-        <button data-home-foul="-1" class="bg-rose-900 hover:bg-rose-800 py-2 rounded btn-hover">F -</button>
-      </div>
-    </div>
+            // === MODIFIED: Score +1 / +2 / +3 buttons → shot clock reset + start ===
+            document.querySelectorAll("[data-home-score]").forEach(b => {
+                b.onclick = () => {
+                    const v = parseInt(b.dataset.homeScore);
+                    getQ().homeScore = Math.max(0, getQ().homeScore + v);
+                    if (v > 0) {
+                        startShot(24);          // ← YE LOGIC ADD KI
+                    } else {
+                        updateAllDisplays();
+                    }
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
+            document.querySelectorAll("[data-away-score]").forEach(b => {
+                b.onclick = () => {
+                    const v = parseInt(b.dataset.awayScore);
+                    getQ().awayScore = Math.max(0, getQ().awayScore + v);
+                    if (v > 0) {
+                        startShot(24);          // ← YE LOGIC ADD KI
+                    } else {
+                        updateAllDisplays();
+                    }
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
 
-    <!-- Away -->
-    <div class="glass rounded-xl p-6 border-t-4 border-orange-500">
-      <h3 id="awayNameCtrl" class="text-2xl font-bold mb-4 text-center cursor-pointer editable">AWAY</h3>
-      <div id="awayScoreCtrl" class="text-6xl font-black text-center mb-6 cursor-pointer text-orange-300 score-glow editable">0</div>
+            document.querySelectorAll("[data-home-to]").forEach(b => {
+                b.onclick = () => {
+                    const v = parseInt(b.dataset.homeTo);
+                    getQ().homeTO = Math.max(0, Math.min(20, getQ().homeTO + v));
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
+            document.querySelectorAll("[data-away-to]").forEach(b => {
+                b.onclick = () => {
+                    const v = parseInt(b.dataset.awayTo);
+                    getQ().awayTO = Math.max(0, Math.min(20, getQ().awayTO + v));
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
+            document.querySelectorAll("[data-home-foul]").forEach(b => {
+                b.onclick = () => {
+                    const v = parseInt(b.dataset.homeFoul);
+                    getQ().homeFouls = Math.max(0, getQ().homeFouls + v);
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
+            document.querySelectorAll("[data-away-foul]").forEach(b => {
+                b.onclick = () => {
+                    const v = parseInt(b.dataset.awayFoul);
+                    getQ().awayFouls = Math.max(0, getQ().awayFouls + v);
+                    updateAllDisplays();
+                    saveState();
+                    if (state.vmix.connected) syncVmixFull();
+                };
+            });
 
-      <div class="grid grid-cols-3 gap-2 mb-5">
-        <button data-away-score="3" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+3</button>
-        <button data-away-score="2" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+2</button>
-        <button data-away-score="1" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded btn-hover text-lg">+1</button>
-        <button data-away-score="-3" class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-3</button>
-        <button data-away-score="-2" class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-2</button>
-        <button data-away-score="-1" class="bg-rose-600 hover:bg-rose-500 py-4 rounded btn-hover text-lg">-1</button>
-      </div>
+            makeEditable(els.homeNameCtrl, () => state.homeName, v => state.homeName = v);
+            makeEditable(els.awayNameCtrl, () => state.awayName, v => state.awayName = v);
+            makeEditable(els.homeScoreCtrl,
+                () => totalHome().toString(),
+                v => {
+                    const newTotal = parseInt(v, 10) || 0;
+                    const currentTotal = totalHome();
+                    const diff = newTotal - currentTotal;
+                    getQ().homeScore = Math.max(0, getQ().homeScore + diff);
+                }
+            );
+            makeEditable(els.awayScoreCtrl,
+                () => totalAway().toString(),
+                v => {
+                    const newTotal = parseInt(v, 10) || 0;
+                    const currentTotal = totalAway();
+                    const diff = newTotal - currentTotal;
+                    getQ().awayScore = Math.max(0, getQ().awayScore + diff);
+                }
+            );
+            makeEditable(els.gameTimerCtrl,
+                () => formatTimer(state.gameTime),
+                v => {
+                    state.gameTime = parseTimer(v);
+                    if (state.gameTime < 0) state.gameTime = 0;
+                },
+                true
+            );
+            makeEditable(els.shotClockCtrl,
+                () => state.shotTime.toString(),
+                v => {
+                    state.shotTime = parseInt(v, 10) || 24;
+                    if (state.shotTime < 0) state.shotTime = 0;
+                },
+                true
+            );
 
-      <div class="grid grid-cols-4 gap-2 text-sm">
-        <button data-away-to="1" class="bg-blue-700 hover:bg-blue-600 py-2 rounded btn-hover">TO +</button>
-        <button data-away-to="-1" class="bg-rose-800 hover:bg-rose-700 py-2 rounded btn-hover">TO -</button>
-        <button data-away-foul="1" class="bg-violet-700 hover:bg-violet-600 py-2 rounded btn-hover">F +</button>
-        <button data-away-foul="-1" class="bg-rose-900 hover:bg-rose-800 py-2 rounded btn-hover">F -</button>
-      </div>
-    </div>
+            document.getElementById("vmixBtn").onclick = () => {
+                els.vmixModal.classList.remove("hidden");
+            };
+            document.getElementById("vmixClose").onclick = () => {
+                els.vmixModal.classList.add("hidden");
+            };
+            document.getElementById("vmixForm").onsubmit = e => {
+                e.preventDefault();
+                state.vmix.ip = document.getElementById("vmixIP").value.trim();
+                state.vmix.port = parseInt(document.getElementById("vmixPort").value) || 8088;
+                state.vmix.input = document.getElementById("vmixInput").value.trim();
+                state.vmix.connected = true;
+                els.vmixModal.classList.add("hidden");
+                document.getElementById("vmixStatus").textContent = "Connected ✓";
+                syncVmixFull();
+                saveState();
+            };
 
-  </div>
-</main>
+            window.addEventListener("beforeunload", e => {
+                if (state.gameRunning || state.shotRunning) {
+                    e.preventDefault();
+                    e.returnValue = "Timer is running! Are you sure?";
+                }
+            });
 
-<!-- vMix Modal -->
-<div id="vmixModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50">
-  <div class="glass p-8 rounded-2xl w-full max-w-md">
-    <h2 class="text-2xl font-bold mb-6">vMix Connection</h2>
-    <form id="vmixForm">
-      <div class="mb-4">
-        <label class="block mb-1">IP Address</label>
-        <input id="vmixIP" type="text" value="127.0.0.1" class="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div class="mb-4">
-        <label class="block mb-1">Port</label>
-        <input id="vmixPort" type="number" value="8088" class="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div class="mb-6">
-        <label class="block mb-1">Input (number or GUID)</label>
-        <input id="vmixInput" type="text" value="1" class="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div class="flex gap-4 justify-end">
-        <button type="button" id="vmixClose" class="px-6 py-3 bg-slate-700 rounded-lg hover:bg-slate-600">Cancel</button>
-        <button type="submit" class="px-6 py-3 bg-emerald-600 rounded-lg hover:bg-emerald-500">Connect</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script src="app.js"></script>
+            updateAllDisplays();
+            if (state.gameRunning) startGameTimer();
+            if (state.shotRunning) startShot(state.shotTime);
+        }
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
 </body>
 </html>
